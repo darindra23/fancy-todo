@@ -227,6 +227,7 @@ function onSignIn(googleUser) {
     .done(response => {
       localStorage.setItem("token", response.token);
       localStorage.setItem("fullname", response.fullname);
+      console.log(response)
       Toast.fire({
         icon: "success",
         title: "Signed in successfully"

@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="google-signin-client_id" content="924343958884-bdmnft40t5hmend66md48ia4vqimufc8.apps.googleusercontent.com">
+    <meta
+      name="google-signin-client_id"
+      content="924343958884-g85d4ru25dbpi5e3g7n40hnvvteufkps.apps.googleusercontent.com"
+    />
     <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
@@ -14,6 +17,47 @@
     <title>App Todo List</title>
   </head>
   <body>
+    <!-- NAVBAR -->
+    <nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <img
+          src="./hacktiv8.png"
+          width="50px"
+          alt=""
+          style="margin-right: 3px;"
+        />
+      </div>
+
+      <div
+        class="collapse navbar-collapse justify-content-end"
+        id="navbarCollapse"
+      >
+        <ul class="navbar-nav">
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              id="profile"
+              href=""
+              id="navbarDropdown"
+              role="button"
+              data-toggle="dropdown"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              Hi,Welcome !
+            </a>
+            <div
+              class="dropdown-menu"
+              aria-labelledby="navbarDropdown"
+              style="margin-left: -80px;"
+            >
+              <a class="dropdown-item" href="" onclick="signOut();">Sign out</a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
     <!-- LOGIN FORM -->
     <div id="login">
       <form class="form-signin" id="form-sign-in">
@@ -127,6 +171,7 @@
       <table class="table table-hover">
         <thead>
           <tr>
+            <th scope="col">No.</th>
             <th scope="col">Title</th>
             <th scope="col">Description</th>
             <th scope="col">Status</th>
@@ -136,7 +181,6 @@
         </thead>
         <tbody id="list-table"></tbody>
       </table>
-      <a href="" onclick="signOut();" class="btn btn-info">Sign out</a>
       <button
         type="button"
         class="btn btn-warning"
@@ -180,7 +224,6 @@
                   id="title"
                   aria-describedby="emailHelp"
                   name="title"
-                  required
                 />
               </div>
               <div class="form-group">
@@ -191,12 +234,11 @@
                   id="description"
                   aria-describedby="emailHelp"
                   name="description"
-                  required
                 />
               </div>
               <div class="form-group">
                 <label for="exampleFormControlSelect1">Status</label>
-                <select class="form-control" id="status" required>
+                <select class="form-control" id="status">
                   <option hidden>-- SELECT STATUS --</option>
                   <option value="complete">Complete</option>
                   <option value="incomplete">Incomplete</option>
@@ -209,7 +251,68 @@
                   class="form-control"
                   id="due_date"
                   name="due_date"
-                  required
+                />
+              </div>
+              <button type="submit" class="btn btn-primary">
+                Save changes
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div
+      class="modal fade"
+      id="modalContactForm"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="myModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Todo</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="edit-todo">
+              <div class="form-group">
+                <label>Title</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="title-edit"
+                  aria-describedby="emailHelp"
+                  name="title"
+                />
+              </div>
+              <div class="form-group">
+                <label>Description</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="description-edit"
+                  aria-describedby="emailHelp"
+                  name="description"
+                />
+              </div>
+              <div class="form-group">
+                <label for="exampleInputPassword1">Deadline</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="date-edit"
+                  name="due_date"
                 />
               </div>
 
@@ -229,78 +332,11 @@
       </div>
     </div>
 
-    <!-- EDIT MODAL -->
-    <div class="modal fade" id="modalContactForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Todo</h5>
-          <button
-            type="button"
-            class="close"
-            data-dismiss="modal"
-            aria-label="Close"
-          >
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <form id="edit-todo">
-            <div class="form-group">
-              <label>Title</label>
-              <input
-                type="text"
-                class="form-control"
-                id="title-edit"
-                aria-describedby="emailHelp"
-                name="title"
-                required
-              />
-            </div>
-            <div class="form-group">
-              <label>Description</label>
-              <input
-                type="text"
-                class="form-control"
-                id="description-edit"
-                aria-describedby="emailHelp"
-                name="description"
-                required
-              />
-            </div>
-            <div class="form-group">
-              <label for="exampleInputPassword1">Deadline</label>
-              <input
-                type="date"
-                class="form-control"
-                id="date-edit"
-                name="due_date"
-                required
-              />
-            </div>
-
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-dismiss="modal"
-            >
-              Close
-            </button>
-            <button type="submit" class="btn btn-primary">
-              Save changes
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
     <!-- SCRIPT -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
     <script src="https://apis.google.com/js/platform.js" async defer></script>
     <script src="./scripts/index.js"></script>
   </body>

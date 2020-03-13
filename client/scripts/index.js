@@ -1,9 +1,21 @@
-const BASE_URL = "http://localhost:3000/todos";
+const BASE_URL = "https://fancy-todo-phase2.herokuapp.com/todos";
 const $login = $("#login");
 const $register = $("#register");
 const $home = $("#home");
 const $list = $("#list-table");
 const $edit = $("#edit");
+const $navbar = $("#navbar");
+const Toast = Swal.mixin({
+  toast: true,
+  position: "top-end",
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+  onOpen: toast => {
+    toast.addEventListener("mouseenter", Swal.stopTimer);
+    toast.addEventListener("mouseleave", Swal.resumeTimer);
+  }
+});
 
 if (localStorage.getItem("token")) {
   todo();
@@ -17,6 +29,7 @@ function login() {
   $register.hide();
   $home.hide();
   $edit.hide();
+  $navbar.hide();
 }
 
 // PAGE REGISTER
@@ -25,6 +38,7 @@ function register() {
   $register.show();
   $home.hide();
   $edit.hide();
+  $navbar.hide();
 }
 
 // HOME PAGE SETELAH LOGIN
@@ -32,6 +46,7 @@ function todo() {
   $login.hide();
   $register.hide();
   $edit.hide();
+  $("#add-todo")[0].reset();
   $.ajax({
     type: "GET",
     url: BASE_URL,
@@ -40,9 +55,11 @@ function todo() {
     }
   }).done(data => {
     $list.empty();
+    let counter = 1;
     data.forEach(element => {
       $list.append(`
       <tr>
+      <td>${counter}</td>
       <td>${element.title}</td>
       <td>${element.description}</td>
       <td><span class="delete" style="color: orange;" onclick="editStatus(${element.id})" id="delete">${element.status}</span></td>
@@ -53,7 +70,10 @@ function todo() {
       <span  class="delete" style="color: orange;" onclick="todoDelete(${element.id})" id="delete">Delete</span>
       </td>
     </tr>`);
+      counter++;
     });
+    $navbar.show();
+    $("#profile").text(localStorage.getItem("fullname"));
     $home.show();
   });
 }
@@ -67,7 +87,6 @@ function editStatus(id) {
       token: localStorage.getItem("token")
     }
   }).done(response => {
-    console.log(response);
     let status;
     if (response.status === "incomplete") {
       status = "complete";
@@ -90,13 +109,16 @@ function editStatus(id) {
 
 // DELETE TODO
 function todoDelete(id) {
-  swal({
-    title: "Are you sure want to delete?",
+  Swal.fire({
+    title: "Are you sure?",
+    text: "You won't be able to revert this!",
     icon: "warning",
-    buttons: true,
-    dangerMode: true
-  }).then(willDelete => {
-    if (willDelete) {
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, delete it!"
+  }).then(result => {
+    if (result.value) {
       $.ajax({
         type: "DELETE",
         url: BASE_URL + "/" + id,
@@ -105,8 +127,9 @@ function todoDelete(id) {
         },
         success: function(response) {
           todo();
-          swal("Poof! Your todo has been deleted!", {
-            icon: "success"
+          Toast.fire({
+            icon: "success",
+            title: "Your todo has been deleted."
           });
         }
       });
@@ -173,23 +196,22 @@ $("#form-sign-in").on("submit", function(e) {
   let userData = { username, password };
   $.ajax({
     type: "POST",
-    url: "http://localhost:3000/user/login",
+    url: "https://fancy-todo-phase2.herokuapp.com/user/login",
     data: userData
   })
     .done(response => {
       localStorage.setItem("token", response.token);
-      swal({
-        title: `Welcome ${response.fullname}`,
-        text: "Here is your todo list, don't forget your deadline !",
-        icon: "success"
+      localStorage.setItem("fullname", response.fullname);
+      Toast.fire({
+        icon: "success",
+        title: `Welcome Back, ${username}`
       });
       todo();
     })
     .fail(err => {
-      swal({
-        title: "Invalid Username or Password.",
-        text: "Please input valid data",
-        icon: "error"
+      Swal.fire({
+        icon: "error",
+        title: "Invalid Username / Password."
       });
     });
 });
@@ -199,20 +221,24 @@ function onSignIn(googleUser) {
   var id_token = googleUser.getAuthResponse().id_token;
   $.ajax({
     type: "POST",
-    url: "http://localhost:3000/user/google",
+    url: "https://fancy-todo-phase2.herokuapp.com/user/google",
     data: { id_token }
   })
     .done(response => {
       localStorage.setItem("token", response.token);
-      swal({
-        title: "Welcome Back",
-        text: "Here is your todo list, Don't forget your deadline !",
-        icon: "success"
+      localStorage.setItem("fullname", response.fullname);
+      Toast.fire({
+        icon: "success",
+        title: "Signed in successfully"
       });
       todo();
     })
     .fail(err => {
-      console.log(err);
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Something went wrong!"
+      });
     });
 }
 
@@ -240,7 +266,7 @@ $("#form-register").on("submit", function(e) {
   };
   $.ajax({
     type: "POST",
-    url: "http://localhost:3000/user/register",
+    url: "https://fancy-todo-phase2.herokuapp.com/user/register",
     data: inputData
   })
     .done(response => {
@@ -248,24 +274,34 @@ $("#form-register").on("submit", function(e) {
       $("#form-register")[0].reset();
     })
     .fail(err => {
-      swal({
-        title: "Invalid Input.",
-        text: "Please fill out all the form.",
-        icon: "error"
-      });
+      if (err.responseJSON.errors[0].message === "email must be unique") {
+        Swal.fire({
+          icon: "error",
+          title: "Email has already registered."
+        });
+      } else if (err.status === 500) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Internal server went wrong!"
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Please fill out all the form."
+        });
+      }
     });
 });
 
 // ADD TODO
-
-$("#add-todo").on("click", function(e) {
+$("#add-todo").on("submit", function(e) {
   e.preventDefault();
   let title = $("#title").val();
   let description = $("#description").val();
   let status = $("#status").val();
   let due_date = $("#due_date").val();
   let inputData = { title, description, status, due_date };
-  console.log(inputData);
   $.ajax({
     type: "POST",
     url: BASE_URL,
@@ -273,9 +309,27 @@ $("#add-todo").on("click", function(e) {
     headers: {
       token: localStorage.getItem("token")
     }
-  }).done(response => {
-    $("#add-todo")[0].reset();
-    $("#exampleModal").modal("toggle");
-    todo();
-  });
+  })
+    .done(response => {
+      $("#add-todo")[0].reset();
+      $("#exampleModal").modal("toggle");
+      todo();
+    })
+    .fail(err => {
+      let message = [];
+      err.responseJSON.errors.forEach(i => {
+        message.push(i.message);
+      });
+      if (message.length > 1) {
+        Swal.fire({
+          icon: "error",
+          title: "Please fill out all the form."
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: message
+        });
+      }
+    });
 });

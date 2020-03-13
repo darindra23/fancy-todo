@@ -86,7 +86,7 @@ class Controller {
           username: user.username,
           email: user.email
         });
-        res.status(200).json({ token });
+        res.status(200).json({ token, fullname });
       })
       .catch(err => {
         next(err);
